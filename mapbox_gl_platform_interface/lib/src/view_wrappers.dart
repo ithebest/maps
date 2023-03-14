@@ -87,7 +87,7 @@ class TextureAndroidViewControllerWrapper
     //? instead of this
     // _controller.dispose();
     //? we do this
-    unawaited(Future.delayed(Duration(seconds: 5), _controller.dispose));
+    unawaited(Future.delayed(Duration(seconds: 1), _controller.dispose));
     return Future(() {});
   }
 
@@ -113,7 +113,9 @@ class TextureAndroidViewControllerWrapper
   /// On Android, this allows the Android native view to draw the a11y highlights
   /// in the same location on the screen as the platform view widget in the Flutter framework.
   // @override
-  Future<void> setOffset(Offset off) => Future(() => {});
+  Future<void> setOffset(Offset off) async {
+    await _controller.setOffset(off)
+  }
 
   // @override
   Future<Size> setSize(Size size) async {
