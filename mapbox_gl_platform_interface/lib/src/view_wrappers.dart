@@ -114,7 +114,7 @@ class TextureAndroidViewControllerWrapper
   /// in the same location on the screen as the platform view widget in the Flutter framework.
   // @override
   Future<void> setOffset(Offset off) async {
-    await _controller.setOffset(off)
+    await _controller.setOffset(off);
   }
 
   // @override
