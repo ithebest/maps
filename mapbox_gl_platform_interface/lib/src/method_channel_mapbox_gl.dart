@@ -162,15 +162,16 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
             );
           },
           onCreatePlatformView: (PlatformViewCreationParams params) {
-            AndroidViewController controller = PlatformViewsService.initAndroidView(
-                id: params.id,
-                viewType: 'plugins.flutter.io/mapbox_gl',
-                layoutDirection: TextDirection.ltr,
-                creationParams: creationParams,
-                creationParamsCodec: const StandardMessageCodec(),
-                onFocus: () => params.onFocusChanged(true),
-              );
-            
+            AndroidViewController controller =
+                PlatformViewsService.initAndroidView(
+              id: params.id,
+              viewType: 'plugins.flutter.io/mapbox_gl',
+              layoutDirection: TextDirection.ltr,
+              creationParams: creationParams,
+              creationParamsCodec: const StandardMessageCodec(),
+              onFocus: () => params.onFocusChanged(true),
+            );
+
             controller.addOnPlatformViewCreatedListener(
               params.onPlatformViewCreated,
             );
