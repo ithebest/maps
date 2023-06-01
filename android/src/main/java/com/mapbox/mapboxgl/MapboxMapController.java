@@ -50,6 +50,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.geometry.LatLngQuad;
 import com.mapbox.mapboxsdk.geometry.VisibleRegion;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -91,6 +92,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -194,7 +196,9 @@ final class MapboxMapController
     }
 
     void init() {
-        lifecycleProvider.getLifecycle().addObserver(this);
+        if (lifecycleProvider.getLifecycle() != null) {
+            lifecycleProvider.getLifecycle().addObserver(this);
+        }
         mapView.getMapAsync(this);
     }
 
@@ -211,7 +215,7 @@ final class MapboxMapController
     }
 
     @Override
-    public void onMapReady(MapboxMap mapboxMap) {
+    public void onMapReady(@NonNull MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         if (mapReadyResult != null) {
             mapReadyResult.success(null);
@@ -282,7 +286,10 @@ final class MapboxMapController
             locationEngine = LocationEngineProvider.getBestLocationEngine(context);
             locationComponent = mapboxMap.getLocationComponent();
             locationComponent.activateLocationComponent(
-                    context, style, buildLocationComponentOptions(style));
+                    LocationComponentActivationOptions
+                            .builder(context, style)
+                            .build()
+            );
             locationComponent.setLocationComponentEnabled(true);
             // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
             locationComponent.setLocationEngine(locationEngine);
@@ -374,7 +381,9 @@ final class MapboxMapController
         GeoJsonSource geoJsonSource = style.getSourceAs(sourceName);
         addedFeaturesByLayer.put(sourceName, featureCollection);
 
-        geoJsonSource.setGeoJson(featureCollection);
+        if (geoJsonSource != null) {
+            geoJsonSource.setGeoJson(featureCollection);
+        }
     }
 
     private void setGeoJsonFeature(String sourceName, String geojsonFeature) {
@@ -383,9 +392,9 @@ final class MapboxMapController
         GeoJsonSource geoJsonSource = style.getSourceAs(sourceName);
         if (featureCollection != null && geoJsonSource != null) {
             final List<Feature> features = featureCollection.features();
-            for (int i = 0; i < features.size(); i++) {
+            for (int i = 0; i < (features != null ? features.size() : 0); i++) {
                 final String id = features.get(i).id();
-                if (id.equals(feature.id())) {
+                if (Objects.equals(id, feature.id())) {
                     features.set(i, feature);
                     break;
                 }
@@ -764,26 +773,39 @@ final class MapboxMapController
             }
             case "map#toLatLng": {
                 Map<String, Object> reply = new HashMap<>();
-                LatLng latlng =
-                        mapboxMap
-                                .getProjection()
-                                .fromScreenLocation(
-                                        new PointF(
-                                                ((Double) call.argument("x")).floatValue(),
-                                                ((Double) call.argument("y")).floatValue()));
-                reply.put("latitude", latlng.getLatitude());
-                reply.put("longitude", latlng.getLongitude());
-                result.success(reply);
+
+                Double x = call.argument("x");
+                Double y = call.argument("y");
+                if (x != null && y != null) {
+                    LatLng latlng =
+                            mapboxMap
+                                    .getProjection()
+                                    .fromScreenLocation(
+                                            new PointF(x.floatValue(), y.floatValue())
+                                    );
+                    reply.put("latitude", latlng.getLatitude());
+                    reply.put("longitude", latlng.getLongitude());
+                    result.success(reply);
+                } else {
+                    result.error("NULLLATLNG", "Lat and Long is null", null);
+                }
                 break;
             }
             case "map#getMetersPerPixelAtLatitude": {
                 Map<String, Object> reply = new HashMap<>();
-                Double retVal =
-                        mapboxMap
-                                .getProjection()
-                                .getMetersPerPixelAtLatitude((Double) call.argument("latitude"));
-                reply.put("metersperpixel", retVal);
-                result.success(reply);
+
+                Double lat = call.argument("latitude");
+
+                if (lat == null) {
+                    result.error("LATNULL", "Lat is null", null);
+                } else {
+                    Double retVal =
+                            mapboxMap
+                                    .getProjection()
+                                    .getMetersPerPixelAtLatitude(lat);
+                    reply.put("metersperpixel", retVal);
+                    result.success(reply);
+                }
                 break;
             }
             case "camera#move": {
@@ -1763,7 +1785,9 @@ final class MapboxMapController
 
     private void updateMyLocationEnabled() {
         if (this.locationComponent == null && myLocationEnabled) {
-            enableLocationComponent(mapboxMap.getStyle());
+            if (mapboxMap.getStyle() != null) {
+                enableLocationComponent(mapboxMap.getStyle());
+            }
         }
 
         if (myLocationEnabled) {
@@ -1867,7 +1891,7 @@ final class MapboxMapController
                     stringBuilder.append(imagePathList.get(j));
                     stringBuilder.append("/");
                 }
-                stringBuilder.append(((float) i) + "x");
+                stringBuilder.append((float) i).append("x");
                 stringBuilder.append("/");
                 stringBuilder.append(imagePathList.get(imagePathList.size() - 1));
                 assetPath = MapboxMapsPlugin.flutterAssets.getAssetFilePathByName(stringBuilder.toString());
