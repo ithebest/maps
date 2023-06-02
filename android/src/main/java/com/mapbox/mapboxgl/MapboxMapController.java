@@ -293,7 +293,7 @@ final class MapboxMapController
             locationComponent.setLocationComponentEnabled(true);
             // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
             locationComponent.setLocationEngine(locationEngine);
-            locationComponent.setMaxAnimationFps(30);
+//            locationComponent.setMaxAnimationFps(30);
             updateMyLocationTrackingMode();
             updateMyLocationRenderMode();
             locationComponent.addOnCameraTrackingChangedListener(this);
