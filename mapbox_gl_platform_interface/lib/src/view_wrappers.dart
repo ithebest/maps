@@ -57,11 +57,14 @@ class TextureAndroidViewControllerWrapper
   /// size is the view's initial size in logical pixel. size can be omitted
   /// if the concrete implementation doesn't require an initial size to create
   /// the platform view.
-  Future<void> create({Size? size}) async {
+  Future<void> create({Size? size, Offset? position}) async {
     await _controller.create();
     awaitingCreation = false;
     if (size != null) {
       await _controller.setSize(size);
+      if (position != null) {
+        await _controller.setOffset(position);
+      }
     }
   }
 
@@ -84,7 +87,7 @@ class TextureAndroidViewControllerWrapper
     //? instead of this
     // _controller.dispose();
     //? we do this
-    unawaited(Future.delayed(Duration(seconds: 5), _controller.dispose));
+    unawaited(Future.delayed(Duration(seconds: 7), _controller.dispose));
     return Future(() {});
   }
 
