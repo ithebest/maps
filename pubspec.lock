@@ -47,10 +47,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: "3e5c9ef82c0af7823be4cb5294a829a6e0548a6f6b4e261e6386509a9e03bcab"
+      sha256: a72242c9a0ffb65d03de1b7113bc4e189686fc07c7147b8b41811d0dd0e0d9bf
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "4.0.17"
   js:
     dependency: transitive
     description:
@@ -109,10 +109,10 @@ packages:
     dependency: transitive
     description:
       name: petitparser
-      sha256: "85e8f8b118afcccf948a9844d199e56260117400bd9b9982d87bf1d62ebc1690"
+      sha256: cb3798bef7fc021ac45b308f4b51208a152792445cce0448c9a4ba5879dd8750
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "5.4.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -138,10 +138,10 @@ packages:
     dependency: transitive
     description:
       name: xml
-      sha256: "88d26fad429944d29b7c418177d156d04bbef049f295cf48130eccc84f0b8b4b"
+      sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "6.3.0"
 sdks:
   dart: ">=3.0.0-0 <4.0.0"
   flutter: ">=2.0.0"

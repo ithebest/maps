@@ -61,7 +61,7 @@ class MapsDemo extends StatefulWidget {
   //
   // Alternatively you can replace `String.fromEnvironment("ACCESS_TOKEN")`
   // in the following line with your access token directly.
-  static const String ACCESS_TOKEN = String.fromEnvironment("ACCESS_TOKEN");
+  static const String ACCESS_TOKEN = "pk.eyJ1IjoibmlzaG9uLW5heGEiLCJhIjoiY2xhYnhwbzN0MDUxYTN1bWhvcWxocWlpaSJ9.0FarR4aPxb7F9BHP31msww";
 
   @override
   State<MapsDemo> createState() => _MapsDemoState();
