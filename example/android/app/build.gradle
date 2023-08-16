@@ -25,12 +25,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
-//    ndkVersion "20.1.5948944"
-    
-    lintOptions {
-        disable 'InvalidPackage'
-    }
+    compileSdkVersion = 33
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
@@ -59,6 +54,10 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    namespace 'com.mapbox.mapboxglexample'
+    lint {
+        disable 'InvalidPackage'
+    }
 }
 
 flutter {
@@ -67,7 +66,7 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.6.0-alpha02'
+    androidTestImplementation 'androidx.test:runner:1.6.0-alpha03'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.0-alpha01'
     constraints {
         implementation('com.google.android.gms:play-services-location') {
