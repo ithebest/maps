@@ -285,12 +285,19 @@ final class MapboxMapController
         if (hasLocationPermission()) {
             locationEngine = LocationEngineProvider.getBestLocationEngine(context);
             locationComponent = mapboxMap.getLocationComponent();
-            locationComponent.activateLocationComponent(
-                    LocationComponentActivationOptions
-                            .builder(context, style)
-                            .build()
-            );
-            locationComponent.setLocationComponentEnabled(true);
+
+            if (!locationComponent.isLocationComponentEnabled()) {
+                locationComponent.setLocationComponentEnabled(true);
+            }
+
+            if (!locationComponent.isLocationComponentActivated()) {
+                locationComponent.activateLocationComponent(
+                        LocationComponentActivationOptions
+                                .builder(context, style)
+                                .build()
+                );
+            }
+
             // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
             locationComponent.setLocationEngine(locationEngine);
 //            locationComponent.setMaxAnimationFps(30);
@@ -304,7 +311,9 @@ final class MapboxMapController
 
     private void updateLocationComponentLayer() {
         if (locationComponent != null && locationComponentRequiresUpdate()) {
-            locationComponent.applyStyle(buildLocationComponentOptions(style));
+           if (style != null) {
+               locationComponent.applyStyle(buildLocationComponentOptions(style));
+           }
         }
     }
 
@@ -1794,10 +1803,6 @@ final class MapboxMapController
             startListeningForLocationUpdates();
         } else {
             stopListeningForLocationUpdates();
-        }
-
-        if (locationComponent != null) {
-            locationComponent.setLocationComponentEnabled(myLocationEnabled);
         }
     }
 
