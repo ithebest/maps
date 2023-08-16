@@ -136,7 +136,7 @@ final class MapboxMapController
     private boolean dragEnabled = true;
     private MethodChannel.Result mapReadyResult;
     private LocationComponent locationComponent = null;
-//    private LocationEngine locationEngine = null;
+    //    private LocationEngine locationEngine = null;
     private LocationEngineCallback<LocationEngineResult> locationEngineCallback = null;
     private LocalizationPlugin localizationPlugin;
     private Style style;
@@ -315,8 +315,6 @@ final class MapboxMapController
 
             // Add the camera tracking listener. Fires if the map camera is manually moved.
             locationComponent.addOnCameraTrackingChangedListener(this);
-
-
 
 
 //            locationEngine = LocationEngineProvider.getBestLocationEngine(context);
@@ -1849,23 +1847,29 @@ final class MapboxMapController
     }
 
     private void updateMyLocationEnabled() {
-        if (this.locationComponent == null && myLocationEnabled) {
-            if (mapboxMap.getStyle() != null) {
-                enableLocationComponent(mapboxMap.getStyle());
-            }
-        }
-
         if (myLocationEnabled) {
-            startListeningForLocationUpdates();
+            if (this.locationComponent == null) {
+                if (mapboxMap.getStyle() != null) {
+                    enableLocationComponent(mapboxMap.getStyle());
+
+                    startListeningForLocationUpdates();
+                }
+            } else {
+                startListeningForLocationUpdates();
+            }
         } else {
             stopListeningForLocationUpdates();
         }
     }
 
     private void startListeningForLocationUpdates() {
-        if (locationEngineCallback == null
-                && locationComponent != null
-                && locationComponent.getLocationEngine() != null) {
+        if (locationComponent == null
+                || locationComponent.getLocationEngine() == null) {
+            return;
+        }
+
+
+        if (locationEngineCallback == null) {
             locationEngineCallback =
                     new LocationEngineCallback<LocationEngineResult>() {
                         @Override
@@ -1877,6 +1881,8 @@ final class MapboxMapController
                         public void onFailure(@NonNull Exception exception) {
                         }
                     };
+
+
             locationComponent
                     .getLocationEngine()
                     .requestLocationUpdates(
@@ -1898,12 +1904,16 @@ final class MapboxMapController
                 new int[]{
                         CameraMode.NONE, CameraMode.TRACKING, CameraMode.TRACKING_COMPASS, CameraMode.TRACKING_GPS
                 };
-        locationComponent.setCameraMode(mapboxTrackingModes[this.myLocationTrackingMode]);
+        if (locationComponent != null) {
+            locationComponent.setCameraMode(mapboxTrackingModes[this.myLocationTrackingMode]);
+        }
     }
 
     private void updateMyLocationRenderMode() {
         int[] mapboxRenderModes = new int[]{RenderMode.NORMAL, RenderMode.COMPASS, RenderMode.GPS};
-        locationComponent.setRenderMode(mapboxRenderModes[this.myLocationRenderMode]);
+        if (locationComponent != null) {
+            locationComponent.setRenderMode(mapboxRenderModes[this.myLocationRenderMode]);
+        }
     }
 
     private boolean hasLocationPermission() {
