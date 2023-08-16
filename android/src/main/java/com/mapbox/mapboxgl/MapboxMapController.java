@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.location.Location;
@@ -33,6 +34,7 @@ import com.google.gson.JsonParser;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.android.gestures.MoveGestureDetector;
@@ -134,7 +136,7 @@ final class MapboxMapController
     private boolean dragEnabled = true;
     private MethodChannel.Result mapReadyResult;
     private LocationComponent locationComponent = null;
-    private LocationEngine locationEngine = null;
+//    private LocationEngine locationEngine = null;
     private LocationEngineCallback<LocationEngineResult> locationEngineCallback = null;
     private LocalizationPlugin localizationPlugin;
     private Style style;
@@ -283,37 +285,71 @@ final class MapboxMapController
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style style) {
         if (hasLocationPermission()) {
-            locationEngine = LocationEngineProvider.getBestLocationEngine(context);
+
+            // Create and customize the LocationComponent's options
+            LocationComponentOptions customLocationComponentOptions = LocationComponentOptions.builder(context)
+                    .elevation(5)
+                    .accuracyAlpha(.6f)
+                    .accuracyColor(Color.BLUE)
+                    .build();
+
+            // Get an instance of the component
             locationComponent = mapboxMap.getLocationComponent();
 
-            if (!locationComponent.isLocationComponentEnabled()) {
-                locationComponent.setLocationComponentEnabled(true);
-            }
+            LocationComponentActivationOptions locationComponentActivationOptions =
+                    LocationComponentActivationOptions.builder(context, style)
+                            .locationComponentOptions(customLocationComponentOptions)
+                            .build();
 
-            if (!locationComponent.isLocationComponentActivated()) {
-                locationComponent.activateLocationComponent(
-                        LocationComponentActivationOptions
-                                .builder(context, style)
-                                .build()
-                );
-            }
+            // Activate with options
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
 
-            // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
-            locationComponent.setLocationEngine(locationEngine);
-//            locationComponent.setMaxAnimationFps(30);
+            // Enable to make component visible
+            locationComponent.setLocationComponentEnabled(true);
+
+            // Set the component's camera mode
             updateMyLocationTrackingMode();
+
+            // Set the component's render mode
             updateMyLocationRenderMode();
+
+            // Add the camera tracking listener. Fires if the map camera is manually moved.
             locationComponent.addOnCameraTrackingChangedListener(this);
+
+
+
+
+//            locationEngine = LocationEngineProvider.getBestLocationEngine(context);
+//            locationComponent = mapboxMap.getLocationComponent();
+//
+//            if (!locationComponent.isLocationComponentActivated()) {
+//                locationComponent.activateLocationComponent(
+//                        LocationComponentActivationOptions
+//                                .builder(context, style)
+//                                .build()
+//                );
+//            }
+//
+//            if (!locationComponent.isLocationComponentEnabled()) {
+//                locationComponent.setLocationComponentEnabled(true);
+//            }
+//
+//            locationComponent.setLocationEngine(locationEngine);
+//            updateMyLocationTrackingMode();
+//            updateMyLocationRenderMode();
+//            locationComponent.addOnCameraTrackingChangedListener(this);
         } else {
             Log.e(TAG, "missing location permissions");
         }
+
+
     }
 
     private void updateLocationComponentLayer() {
         if (locationComponent != null && locationComponentRequiresUpdate()) {
-           if (style != null) {
-               locationComponent.applyStyle(buildLocationComponentOptions(style));
-           }
+            if (style != null) {
+                locationComponent.applyStyle(buildLocationComponentOptions(style));
+            }
         }
     }
 
@@ -1129,28 +1165,48 @@ final class MapboxMapController
             }
             case "locationComponent#getLastLocation": {
                 Log.e(TAG, "location component: getLastLocation");
-                if (this.myLocationEnabled && locationComponent != null && locationEngine != null) {
+                if (this.myLocationEnabled && locationComponent != null) {
                     Map<String, Object> reply = new HashMap<>();
-                    locationEngine.getLastLocation(
-                            new LocationEngineCallback<LocationEngineResult>() {
-                                @Override
-                                public void onSuccess(LocationEngineResult locationEngineResult) {
-                                    Location lastLocation = locationEngineResult.getLastLocation();
-                                    if (lastLocation != null) {
-                                        reply.put("latitude", lastLocation.getLatitude());
-                                        reply.put("longitude", lastLocation.getLongitude());
-                                        reply.put("altitude", lastLocation.getAltitude());
-                                        result.success(reply);
-                                    } else {
-                                        result.error("", "", null); // ???
-                                    }
-                                }
 
-                                @Override
-                                public void onFailure(@NonNull Exception exception) {
-                                    result.error("", "", null); // ???
-                                }
-                            });
+                    if (locationComponent.isLocationComponentActivated() && locationComponent.isLocationComponentEnabled()) {
+                        Location lastLocation = locationComponent.getLastKnownLocation();
+
+                        if (lastLocation != null) {
+                            if (lastLocation != null) {
+                                reply.put("latitude", lastLocation.getLatitude());
+                                reply.put("longitude", lastLocation.getLongitude());
+                                reply.put("altitude", lastLocation.getAltitude());
+                                result.success(reply);
+                            } else {
+                                result.error("", "", null); // ???
+                            }
+                        } else {
+                            result.error("", "", null); // ???
+                        }
+                    } else {
+                        result.error("", "", null); // ???
+                    }
+
+//                    locationEngine.getLastLocation(
+//                            new LocationEngineCallback<LocationEngineResult>() {
+//                                @Override
+//                                public void onSuccess(LocationEngineResult locationEngineResult) {
+//                                    Location lastLocation = locationEngineResult.getLastLocation();
+//                                    if (lastLocation != null) {
+//                                        reply.put("latitude", lastLocation.getLatitude());
+//                                        reply.put("longitude", lastLocation.getLongitude());
+//                                        reply.put("altitude", lastLocation.getAltitude());
+//                                        result.success(reply);
+//                                    } else {
+//                                        result.error("", "", null); // ???
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onFailure(@NonNull Exception exception) {
+//                                    result.error("", "", null); // ???
+//                                }
+//                            });
                 }
                 break;
             }
