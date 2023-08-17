@@ -32,12 +32,12 @@ class TextureAndroidViewControllerWrapper
 
   final TextureAndroidViewController _controller;
 
-  // @override
+  @override
   PointTransformer get pointTransformer => _controller.pointTransformer;
   set pointTransformer(PointTransformer transformer) =>
       _controller.pointTransformer = transformer;
 
-  // @override
+  @override
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
       _controller.addOnPlatformViewCreatedListener(listener);
 
@@ -126,6 +126,10 @@ class TextureAndroidViewControllerWrapper
 
   // @override
   int get viewId => _controller.viewId;
+
+  @override
+  // TODO: implement requiresViewComposition
+  bool get requiresViewComposition => throw UnimplementedError();
 }
 
 class AndroidViewWithWrappedController extends StatefulWidget {
